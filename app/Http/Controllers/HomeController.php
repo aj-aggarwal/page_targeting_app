@@ -62,6 +62,30 @@ class HomeController extends Controller
         }
     }
 
+    /**
+     * Get alert mesage to show on targeted page by matching rules..
+     */
+    public function getAlertMessage(Request $request)
+    {
+        $rule = Rule::whereToken($request->snippet_id)->first();
+        $alertMessage = '';
+
+        if($rule) {
+            $alertMessage = $this->getMessageByMatchingRules($rule, $request->current_page_path_name);
+        }
+        return response()->json([
+            'alert_message' => $alertMessage,
+        ]);
+    }
+
+    /**
+     * A function for testing snippet. It renders test.blade.php view file where we can add snippet to test.
+     */
+    public function test()
+    {
+        return view('test');
+    }
+
     /********** Private Section ***********/
 
     /**
@@ -87,5 +111,60 @@ class HomeController extends Controller
         }
 
         return $random_string;
+    }
+
+    private function getMessageByMatchingRules($rule, $pathName)
+    {
+        $message = '';
+        $pathName = ltrim($pathName, '/');
+        $rules = $rule->rules;
+
+        // First check don't show rules
+        foreach ($rules as $value) {
+           if(!isset($value['constraint']) || $value['constraint'] != 'dont_show') continue;
+           if($this->isRuleMatched($value['rule'], $pathName, $value['value'])) {
+                return ''; // Empty Message / No Message
+           }
+        }
+
+        // Match show message rules..
+        foreach ($rules as $value) {
+           if(!isset($value['constraint']) || $value['constraint'] == 'dont_show') continue;
+           
+           if($this->isRuleMatched($value['rule'], $pathName, $value['value'])) {
+                return $rule->message; //  return message string..
+           }
+        }
+
+        return $message;
+    }
+
+    private function isRuleMatched($rule, $pathName, $matchValue)
+    {
+        $matchValue = strtolower($matchValue);
+        switch ($rule) {
+            case 'contains':
+                if(stripos($pathName, $matchValue) !== false) return true;
+                break;
+
+            case 'start_with':
+                if(stripos($pathName, $matchValue) === 0) return true;
+                break;
+
+            case 'end_with':
+                $len = strlen($matchValue);
+                if($len && substr($pathName, -$len) === $matchValue) return true;
+                break;
+
+            case 'exact':
+                if($pathName == $matchValue) return true;
+                break;
+            
+            default:
+                return false;
+                break;
+        }
+
+        return false;
     }
 }

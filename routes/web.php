@@ -21,5 +21,6 @@ Auth::routes();
 
 Route::get('/home', 'HomeController@index')->name('home');
 Route::post('/save_data', 'HomeController@saveData')->name('save_data');
-
+Route::get('/get_alert_message', 'HomeController@getAlertMessage');
+Route::get('/{text}', 'HomeController@test');
 
