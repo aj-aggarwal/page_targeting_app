@@ -12,10 +12,41 @@
                             <label for="message" class="col-md-2 col-form-label">Popup Message</label>
 
                             <div class="col-md-3">
-                                <input id="message" type="text" class="form-control" name="message" value="" required placeholder="Welcome to my page">
+                                <input id="message" type="text" class="form-control" name="message" value="{{$message ?? ''}}" required placeholder="Welcome to my page">
                             </div>
                         </div>
                         <div id="rules">
+                            @if(isset($rules_count) && $rules_count)
+                                @foreach($rules as $key => $value)
+                                <div class="form-group row rules-row">
+                                    <div class="col-md-2">
+                                        <select class="form-control constraint-input" name="rules[{{$key}}][constraint]">
+                                            <option value="show" @if($value['constraint'] == 'show') selected @endif>Show On</option>
+                                            <option value="dont_show" @if($value['constraint'] == 'dont_show') selected @endif>Don't show On</option>
+                                        </select>
+                                    </div>
+                                    <div class="col-md-3">
+                                        <select class="form-control rule-input" name="rules[{{$key}}][rule]">
+                                            <option value="contains" @if($value['rule'] == 'contains') selected @endif>Pages that contains</option>
+                                            <option value="start_with" @if($value['rule'] == 'start_with') selected @endif>Pages starting with</option>
+                                            <option value="end_with" @if($value['rule'] == 'end_with') selected @endif>Pages ending with</option>
+                                            <option value="exact" @if($value['rule'] == 'exact') selected @endif>A specific page</option>
+                                        </select>
+                                    </div>
+                                    <div class="col-md-2">
+                                        <label for="value" class="col-form-label">www.domain.com/</label>
+                                    </div>    
+                                    <div class="col-md-4">
+                                        <input id="value" type="text" class="form-control value-input" name="rules[{{$key}}][value]" value="{{$value['value'] ?? ''}}" required placeholder="Enter text">
+                                    </div>
+                                    @if($key != 0)
+                                    <div class="col-md-1">
+                                        <button type="button" class="btn btn-danger" id="remove-rules">X</button>
+                                    </div>
+                                    @endif
+                                </div>
+                                @endforeach
+                            @else
                             <div class="form-group row rules-row">
                                 <div class="col-md-2">
                                     <select class="form-control constraint-input" name="rules[0][constraint]">
@@ -37,10 +68,8 @@
                                 <div class="col-md-4">
                                     <input id="value" type="text" class="form-control value-input" name="rules[0][value]" value="" required placeholder="Enter text">
                                 </div>
-                                <!-- <div class="col-md-1">
-                                    <button type="button" class="btn btn-danger" id="remove-rules">X</button>
-                                </div> -->
-                            </div>    
+                            </div>
+                            @endif
                         </div>
                         <div class="form-group row mb-0">
                             <div class="col-md-6">
@@ -56,12 +85,15 @@
     </div>
 </div>
 
+@php 
+    $count = isset($rules_count) ? $rules_count : 1;
+@endphp
 <script type="text/javascript">
     $(document).ready(function(){
 
-        var input_row_count = 1;
+        var input_row_count = "{{$count}}";
 
-        // Remove new rule row..
+        // Add new rule row..
         $('#add-rule').click(function(e){
             e.preventDefault();
             
@@ -69,6 +101,7 @@
             inputs_row.find('.constraint-input').attr('name', "rules["+input_row_count+"][constraint]");
             inputs_row.find('.rule-input').attr('name', "rules["+input_row_count+"][rule]");
             inputs_row.find('.value-input').attr('name', "rules["+input_row_count+"][value]");
+            inputs_row.find('.value-input').attr('value', "");
             inputs_row.append("<div class='col-md-1'><button type='button' class='btn btn-danger' id='remove-rules'>X</button></div>");
             inputs_row.appendTo('#rules').show();
             input_row_count++;

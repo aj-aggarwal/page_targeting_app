@@ -27,7 +27,19 @@ class HomeController extends Controller
     public function index()
     {
         // return view('home');
-        return view('page_targeting');
+        $currentUserId = auth()->id();
+        $rule = Rule::whereUserId($currentUserId)->first();
+
+        $data = [];
+        if($rule) {
+            $data = [
+                'message' => $rule->message,
+                'token' => $rule->token,
+                'rules' => $rule->rules,
+                'rules_count' => count($rule->rules),
+            ];
+        }
+        return view('page_targeting', $data);
     }
 
     /**
@@ -41,13 +53,20 @@ class HomeController extends Controller
         ]);
 
         try {
-            $rule = new Rule;
-            $rule->user_id  = auth()->id();
-            $rule->token = $this->generateUniqueToken();
+            $currentUserId = auth()->id();
+
+            $rule = Rule::whereUserId($currentUserId)->first();
+
+            if(!$rule) {
+                $rule = new Rule;
+                $rule->user_id  = $currentUserId;
+                $rule->token = $this->generateUniqueToken();
+            }
+
             $rule->message = $request->message;
             $rule->rules = $request->rules;
-            $rule->save();
-
+            $rule->save();  
+            
             $snippet = '<script src="'.URL::asset('/js/snippet.js').'?id='.$rule->token.'"></script>';
 
             return response()->json([
