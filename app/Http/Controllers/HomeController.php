@@ -138,9 +138,12 @@ class HomeController extends Controller
         $pathName = ltrim($pathName, '/');
         $rules = $rule->rules;
 
+        $dontShow = false;
+        $show = false;
         // First check don't show rules
         foreach ($rules as $value) {
            if(!isset($value['constraint']) || $value['constraint'] != 'dont_show') continue;
+           $dontShow = true;
            if($this->isRuleMatched($value['rule'], $pathName, $value['value'])) {
                 return ''; // Empty Message / No Message
            }
@@ -149,13 +152,18 @@ class HomeController extends Controller
         // Match show message rules..
         foreach ($rules as $value) {
            if(!isset($value['constraint']) || $value['constraint'] == 'dont_show') continue;
-           
+           $show = true;
            if($this->isRuleMatched($value['rule'], $pathName, $value['value'])) {
                 return $rule->message; //  return message string..
            }
         }
 
-        return $message;
+        // Have atleast one show rule..
+        if($show) {
+            return '';
+        }else{
+            return $rule->message;
+        }
     }
 
     private function isRuleMatched($rule, $pathName, $matchValue)
