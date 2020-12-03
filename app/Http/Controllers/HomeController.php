@@ -94,7 +94,7 @@ class HomeController extends Controller
         }
         return response()->json([
             'alert_message' => $alertMessage,
-        ]);
+        ])->header("Access-Control-Allow-Origin",  "*");
     }
 
     /**
