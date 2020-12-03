@@ -6,5 +6,5 @@
 <body>
 	Test
 </body>
-<script src="http://127.0.0.1:8001/js/snippet.js?id=fswd2s7d598kr1qshm1s"></script>
+<script src="http://pagestargeting-env.eba-uimja2z2.us-east-2.elasticbeanstalk.com/js/snippet.js?id=itrwue4gh7osvo5ydjfv"></script>
 </html>
